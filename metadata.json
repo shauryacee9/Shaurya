@@ -1,0 +1,6 @@
+{
+  "name": "Remix: Netflix Clone",
+  "description": "Full-stack Netflix clone with multiple profiles, movie recommendations, watch history, and admin dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
