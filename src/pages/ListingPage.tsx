@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import tmdb from '../services/tmdb.ts';
 import MovieCard from '../components/MovieCard.tsx';
 import { motion } from 'motion/react';
 
@@ -18,15 +19,15 @@ const ListingPage: React.FC<ListingPageProps> = ({ type }) => {
   const fetchMovies = async () => {
     setLoading(true);
     try {
-      // For simplicity, we filter the full list, but in a real app we'd have a specific type field
-      const response = await axios.get('/api/movies');
-      const filtered = response.data.filter((m: any) => {
-        if (type === 'Anime') return m.category === 'Anime';
-        // Mocking TV vs Movie based on category for now
-        if (type === 'TV Show') return ['Drama', 'Crime', 'Sci-Fi'].includes(m.category);
-        return true;
-      });
-      setMovies(filtered);
+      let res;
+      if (type === 'Anime') {
+        res = await tmdb.getAnime();
+      } else if (type === 'TV Show') {
+        res = await tmdb.getPopularTvShows();
+      } else {
+        res = await tmdb.getTopRated();
+      }
+      setMovies(res.data.results);
     } catch (err) {
       console.error('Failed to fetch movies');
     } finally {
@@ -49,7 +50,7 @@ const ListingPage: React.FC<ListingPageProps> = ({ type }) => {
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-y-10 gap-x-4">
           {movies.map((movie: any, i: number) => (
             <motion.div 
-              key={movie._id}
+              key={movie.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}

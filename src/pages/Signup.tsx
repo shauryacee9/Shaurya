@@ -15,7 +15,7 @@ const Signup: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await signup(name, email, password);
+      await signup(name, email, password, role);
       navigate('/profile-selection');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Signup failed');

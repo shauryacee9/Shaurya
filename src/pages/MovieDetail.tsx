@@ -1,19 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext.tsx';
 import { ArrowLeft, Play } from 'lucide-react';
 import { motion } from 'motion/react';
+import tmdb, { getImageUrl } from '../services/tmdb.ts';
 
 const MovieDetail: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { selectedProfile } = useAuth();
   const [movie, setMovie] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const lastSaveTimeRef = useRef(0);
+  
+  const queryParams = new URLSearchParams(location.search);
+  const type = queryParams.get('type') as 'movie' | 'tv' || 'movie';
 
   useEffect(() => {
     fetchMovie();
@@ -21,7 +24,7 @@ const MovieDetail: React.FC = () => {
 
   const fetchMovie = async () => {
     try {
-      const response = await axios.get(`/api/movies/${id}`);
+      const response = await tmdb.getMovieOrTvDetails(id as string, type);
       setMovie(response.data);
       setLoading(false);
     } catch (err) {
@@ -32,9 +35,7 @@ const MovieDetail: React.FC = () => {
 
   const handlePlay = async () => {
     setIsPlaying(true);
-    if (videoRef.current) videoRef.current.play();
     
-    // Auto-save history when starting
     try {
       await axios.post('/api/history/add', {
         profileId: selectedProfile?._id,
@@ -46,28 +47,9 @@ const MovieDetail: React.FC = () => {
     }
   };
 
-  const handleTimeUpdate = async () => {
-    if (videoRef.current && selectedProfile) {
-      const currentTime = videoRef.current.currentTime;
-      const progress = Math.round((currentTime / videoRef.current.duration) * 100);
-      
-      // Save every 5 seconds of playback
-      if (currentTime - lastSaveTimeRef.current >= 5) {
-        lastSaveTimeRef.current = currentTime;
-        try {
-          await axios.post('/api/history/add', {
-            profileId: selectedProfile._id,
-            movieId: id,
-            progressPercentage: progress
-          });
-        } catch (err) {
-          console.error('Failed to update history', err);
-        }
-      }
-    }
-  };
-
   if (loading) return <div className="h-screen w-screen flex items-center justify-center bg-[#141414]">Loading...</div>;
+
+  const title = movie?.title || movie?.name;
 
   return (
     <div className="fixed inset-0 z-[100] bg-black">
@@ -78,12 +60,12 @@ const MovieDetail: React.FC = () => {
         >
           <ArrowLeft className="w-8 h-8" />
         </button>
-        <span className="text-xl font-medium hidden md:block">Watching: {movie?.title}</span>
+        <span className="text-xl font-medium hidden md:block">Watching: {title}</span>
       </div>
 
       {!isPlaying ? (
         <div className="relative h-full w-full">
-          <img src={movie?.bannerUrl} alt={movie?.title} className="w-full h-full object-cover" />
+          <img src={getImageUrl(movie?.backdrop_path || movie?.poster_path, 'original')} alt={title} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center">
             <motion.button 
               whileHover={{ scale: 1.1 }}
@@ -93,43 +75,19 @@ const MovieDetail: React.FC = () => {
             >
               <Play className="fill-black w-12 h-12" />
             </motion.button>
-            <h1 className="text-white text-4xl font-bold">{movie?.title}</h1>
+            <h1 className="text-white text-4xl font-bold">{title}</h1>
           </div>
         </div>
       ) : (
         <div className="relative h-full w-full">
-          {movie?.videoUrl?.includes('youtube.com') ? (
-            <iframe
-              src={`${movie.videoUrl}?autoplay=1&mute=0&controls=1`}
-              className="w-full h-full"
-              allow="autoplay; fullscreen"
-              title={`${movie.title} Video`}
-              frameBorder="0"
-              allowFullScreen
-              referrerPolicy="strict-origin-when-cross-origin"
-            ></iframe>
-          ) : movie?.videoUrl ? (
-            <video 
-              ref={videoRef}
-              src={movie.videoUrl}
-              className="h-full w-full"
-              controls
-              onTimeUpdate={handleTimeUpdate}
-              autoPlay
-            />
-          ) : movie?.trailerUrl ? (
-            <iframe
-              src={`${movie.trailerUrl}?autoplay=1&mute=0&controls=1`}
-              className="w-full h-full"
-              allow="autoplay; fullscreen"
-              title={`${movie.title} Trailer`}
-              frameBorder="0"
-              allowFullScreen
-              referrerPolicy="strict-origin-when-cross-origin"
-            ></iframe>
-          ) : (
-            <div className="flex items-center justify-center h-full text-white">No video available</div>
-          )}
+          <iframe
+            src={`https://vidlink.pro/${type}/${id}`}
+            className="w-full h-full"
+            allow="autoplay; fullscreen"
+            title={`${title} Video`}
+            frameBorder="0"
+            allowFullScreen
+          ></iframe>
         </div>
       )}
     </div>

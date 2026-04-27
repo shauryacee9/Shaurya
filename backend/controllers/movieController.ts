@@ -1,5 +1,6 @@
-import Movie from '../models/Movie.ts';
-import WatchHistory from '../models/WatchHistory.ts';
+import Movie from '../models/Movie.js';
+import WatchHistory from '../models/WatchHistory.js';
+import cloudinary from '../config/cloudinary.js';
 
 export const getMovies = async (req: any, res: any) => {
   try {
@@ -49,10 +50,36 @@ export const getMovieById = async (req: any, res: any) => {
 
 export const createMovie = async (req: any, res: any) => {
   try {
-    const movieData = { ...req.body, createdByAdmin: req.user._id };
+    let trailerUrl = '';
+    let videoUrl = '';
+
+    // If there is an uploaded file, upload it to Cloudinary via buffer
+    if (req.file) {
+      const uploadResult: any = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { resource_type: "video", folder: "netflix_trailers" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        stream.end(req.file.buffer);
+      });
+      trailerUrl = uploadResult.secure_url;
+      videoUrl = uploadResult.secure_url;
+    }
+
+    const movieData = { 
+      ...req.body, 
+      trailerUrl,
+      videoUrl: req.body.videoUrl || videoUrl,
+      createdByAdmin: req.user?._id || null 
+    };
+
     const movie = await Movie.create(movieData);
     res.status(201).json(movie);
   } catch (error: any) {
+    console.error("Create movie error:", error);
     res.status(500).json({ message: error.message });
   }
 };

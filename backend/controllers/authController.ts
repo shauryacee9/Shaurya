@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
-import User from "../models/User.ts";
+import User from "../models/User.js";
 
 const generateToken = (id: string) => {
   return jwt.sign(

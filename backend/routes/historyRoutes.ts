@@ -1,6 +1,6 @@
 import express from 'express';
-import { addHistory, getHistoryByProfile } from '../controllers/historyController.ts';
-import { authMiddleware } from '../middleware/authMiddleware.ts';
+import { addHistory, getHistoryByProfile } from '../controllers/historyController.js';
+import { authMiddleware } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 

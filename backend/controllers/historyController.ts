@@ -1,4 +1,4 @@
-import WatchHistory from '../models/WatchHistory.ts';
+import WatchHistory from '../models/WatchHistory.js';
 
 export const addHistory = async (req: any, res: any) => {
   try {
@@ -29,7 +29,6 @@ export const addHistory = async (req: any, res: any) => {
 export const getHistoryByProfile = async (req: any, res: any) => {
   try {
     const history = await WatchHistory.find({ profileId: req.params.profileId })
-      .populate('movieId')
       .sort({ watchedAt: -1 });
     res.json(history);
   } catch (error: any) {

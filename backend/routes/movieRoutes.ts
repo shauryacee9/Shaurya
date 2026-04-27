@@ -10,18 +10,17 @@ import {
   createMovie,
   updateMovie,
   deleteMovie,
-  getRecommendations,
-} from "../controllers/movieController";
+  getRecommendations
+} from "../controllers/movieController.js";
 
-import { authMiddleware } from "../middleware/authMiddleware";
-import { adminMiddleware } from "../middleware/adminMiddleware";
+import { authMiddleware } from "../middleware/authMiddleware.js";
+import { adminMiddleware } from "../middleware/adminMiddleware.js";
 
 const router = express.Router();
 
-// multer setup for trailer upload
-const upload = multer({ dest: "uploads/" });
+const storage = multer.memoryStorage();
+const upload = multer({ storage }); // ✅ REQUIRED
 
-// Public routes
 router.get("/", getMovies);
 router.get("/trending", getTrendingMovies);
 router.get("/category/:category", getMoviesByCategory);
@@ -29,12 +28,16 @@ router.get("/language/:language", getMoviesByLanguage);
 router.get("/recommendations/:profileId", getRecommendations);
 router.get("/:id", getMovieById);
 
-// Admin routes (protected + file upload enabled)
+/*
+IMPORTANT FIX HERE
+multer must run BEFORE controller
+*/
+
 router.post(
   "/",
   authMiddleware,
   adminMiddleware,
-  upload.single("trailer"),
+  upload.single("trailer"), // ✅ REQUIRED
   createMovie
 );
 

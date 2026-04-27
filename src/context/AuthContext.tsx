@@ -21,7 +21,7 @@ interface AuthContextType {
   selectedProfile: Profile | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (name: string, email: string, password: string) => Promise<void>;
+  signup: (name: string, email: string, password: string, role?: string) => Promise<void>;
   logout: () => void;
   selectProfile: (profile: Profile) => void;
 }
@@ -65,8 +65,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(userData);
   };
 
-  const signup = async (name: string, email: string, password: string) => {
-    const response = await axios.post('/api/auth/signup', { name, email, password });
+  const signup = async (name: string, email: string, password: string, role: string = 'user') => {
+    const response = await axios.post('/api/auth/signup', { name, email, password, role });
     const { token, ...userData } = response.data;
     localStorage.setItem('token', token);
     setToken(token);
