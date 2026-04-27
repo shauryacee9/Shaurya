@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext.tsx';
-import { ArrowLeft, Volume2, VolumeX, Maximize2, Play, Pause } from 'lucide-react';
+import { ArrowLeft, Play } from 'lucide-react';
 import { motion } from 'motion/react';
 
 const MovieDetail: React.FC = () => {
@@ -13,6 +13,7 @@ const MovieDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const lastSaveTimeRef = useRef(0);
 
   useEffect(() => {
     fetchMovie();
@@ -46,9 +47,23 @@ const MovieDetail: React.FC = () => {
   };
 
   const handleTimeUpdate = async () => {
-    if (videoRef.current) {
-      const progress = Math.round((videoRef.current.currentTime / videoRef.current.duration) * 100);
-      // Periodically update progress could be implemented here, but for simplicity we can just do it on end or pause
+    if (videoRef.current && selectedProfile) {
+      const currentTime = videoRef.current.currentTime;
+      const progress = Math.round((currentTime / videoRef.current.duration) * 100);
+      
+      // Save every 5 seconds of playback
+      if (currentTime - lastSaveTimeRef.current >= 5) {
+        lastSaveTimeRef.current = currentTime;
+        try {
+          await axios.post('/api/history/add', {
+            profileId: selectedProfile._id,
+            movieId: id,
+            progressPercentage: progress
+          });
+        } catch (err) {
+          console.error('Failed to update history', err);
+        }
+      }
     }
   };
 
@@ -83,14 +98,38 @@ const MovieDetail: React.FC = () => {
         </div>
       ) : (
         <div className="relative h-full w-full">
-          <video 
-            ref={videoRef}
-            src={movie?.videoUrl}
-            className="h-full w-full"
-            controls
-            onTimeUpdate={handleTimeUpdate}
-            autoPlay
-          />
+          {movie?.videoUrl?.includes('youtube.com') ? (
+            <iframe
+              src={`${movie.videoUrl}?autoplay=1&mute=0&controls=1`}
+              className="w-full h-full"
+              allow="autoplay; fullscreen"
+              title={`${movie.title} Video`}
+              frameBorder="0"
+              allowFullScreen
+              referrerPolicy="strict-origin-when-cross-origin"
+            ></iframe>
+          ) : movie?.videoUrl ? (
+            <video 
+              ref={videoRef}
+              src={movie.videoUrl}
+              className="h-full w-full"
+              controls
+              onTimeUpdate={handleTimeUpdate}
+              autoPlay
+            />
+          ) : movie?.trailerUrl ? (
+            <iframe
+              src={`${movie.trailerUrl}?autoplay=1&mute=0&controls=1`}
+              className="w-full h-full"
+              allow="autoplay; fullscreen"
+              title={`${movie.title} Trailer`}
+              frameBorder="0"
+              allowFullScreen
+              referrerPolicy="strict-origin-when-cross-origin"
+            ></iframe>
+          ) : (
+            <div className="flex items-center justify-center h-full text-white">No video available</div>
+          )}
         </div>
       )}
     </div>

@@ -6,6 +6,7 @@ const movieSchema = new mongoose.Schema({
   thumbnailUrl: { type: String, required: true },
   bannerUrl: { type: String, required: true },
   videoUrl: { type: String, required: true },
+  trailerUrl: { type: String, required: true },
   category: { type: String, required: true }, // e.g., Action, Comedy, Anime
   language: { type: String, required: true }, // e.g., Hindi, English, Japanese
   releaseYear: { type: Number, required: true },

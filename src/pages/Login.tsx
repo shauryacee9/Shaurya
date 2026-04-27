@@ -21,7 +21,7 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="relative h-screen w-screen flex flex-col items-center justify-center bg-[url('https://assets.nflxext.com/ffe/siteui/vlv3/f841d4c7-10e1-40af-bca1-0746f9074b4a/867c2957-36e2-4309-84d4-5396593a388e/US-en-20220502-popsignuptwelve-perspective_alpha_website_small.jpg')] bg-center bg-cover">
+    <div className="relative h-screen w-screen flex flex-col items-center justify-center bg-[url('https://assets.nflxext.com/ffe/siteui/vlv3/93da5c27-be66-427c-8b72-5cb39d275279/94eb5ad7-10d8-4cca-bf45-ac52e0a052c0/US-en-20240226-popsignuptwelve-perspective_alpha_website_large.jpg')] bg-center bg-cover">
       <div className="absolute inset-0 bg-black/60" />
       
       <div className="absolute top-8 left-8">
