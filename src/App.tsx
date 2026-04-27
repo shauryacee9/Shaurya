@@ -10,6 +10,7 @@ import AdminDashboard from './pages/AdminDashboard.tsx';
 import Navbar from './pages/Navbar.tsx';
 import Footer from './components/Footer.tsx';
 import ListingPage from './pages/ListingPage.tsx';
+import Search from './pages/Search.tsx';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { token, loading } = useAuth();
@@ -54,6 +55,14 @@ const AppContent = () => {
           <Route path="/tvshows" element={<ListingPage type="TV Show" />} />
           <Route path="/movies" element={<ListingPage type="Movie" />} />
           <Route path="/anime" element={<ListingPage type="Anime" />} />
+          <Route path="/search" element={
+            <ProtectedRoute>
+              <ProfileRoute>
+                <Search />
+              </ProfileRoute>
+            </ProtectedRoute>
+          } />
+
           <Route path="/movie/:id" element={
             <ProtectedRoute>
               <ProfileRoute>

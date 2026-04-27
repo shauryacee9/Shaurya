@@ -3,6 +3,7 @@ import axios from 'axios';
 import tmdb, { getImageUrl } from '../services/tmdb.ts';
 import { useAuth } from '../context/AuthContext.tsx';
 import MovieSlider from '../components/MovieSlider.tsx';
+import Top10Slider from '../components/Top10Slider.tsx';
 import { Play, Info } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -125,7 +126,8 @@ const Home: React.FC = () => {
       )}
 
       {/* Rows */}
-      <div className="-mt-32 relative z-10 space-y-12">
+      <div className="pb-20 -mt-32 relative z-20 space-y-12">
+        <Top10Slider title="Top 10 Series in Netflix Today" movies={trending} />
         <MovieSlider title="Trending Now" movies={trending} />
         {history.length > 0 && <MovieSlider title="Continue Watching" movies={history} />}
         <MovieSlider title="Recommended For You" movies={recommendations} />

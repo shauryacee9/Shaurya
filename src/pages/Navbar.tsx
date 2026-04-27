@@ -8,6 +8,8 @@ const Navbar: React.FC = () => {
   const { user, selectedProfile, logout, token } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -34,7 +36,42 @@ const Navbar: React.FC = () => {
       </div>
 
       <div className="flex items-center gap-4 md:gap-6">
-        <Search className="w-5 h-5 text-gray-300 cursor-pointer hover:scale-110 transition-transform" />
+        <div className="flex items-center">
+          <motion.div 
+            initial={false}
+            animate={{ 
+              width: isSearchOpen ? '250px' : '0px',
+              opacity: isSearchOpen ? 1 : 0
+            }}
+            className="overflow-hidden flex items-center bg-black/60 border border-white/50 rounded"
+          >
+            <Search className="w-5 h-5 text-white ml-2 shrink-0" />
+            <input 
+              type="text" 
+              placeholder="Titles, people, genres"
+              className="bg-transparent border-none outline-none text-white px-3 py-1.5 w-full text-sm placeholder-gray-400"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                if (e.target.value.trim()) {
+                  navigate(`/search?q=${encodeURIComponent(e.target.value)}`);
+                } else {
+                  navigate('/');
+                }
+              }}
+              onBlur={() => {
+                if (!searchQuery) setIsSearchOpen(false);
+              }}
+              autoFocus={isSearchOpen}
+            />
+          </motion.div>
+          {!isSearchOpen && (
+            <Search 
+              className="w-5 h-5 text-gray-300 cursor-pointer hover:scale-110 transition-transform" 
+              onClick={() => setIsSearchOpen(true)}
+            />
+          )}
+        </div>
         <span className="hidden md:block text-xs text-gray-300 uppercase tracking-widest cursor-pointer">Kids</span>
         <Bell className="w-5 h-5 text-gray-300 cursor-pointer hover:scale-110 transition-transform" />
         

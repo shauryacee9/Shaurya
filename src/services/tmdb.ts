@@ -21,7 +21,8 @@ const tmdbApi = Object.assign(tmdb, {
   getSciFiMovies: () => tmdb.get('/discover/movie?with_genres=878'),
   getAnime: () => tmdb.get('/discover/tv?with_genres=16'),
   getPopularTvShows: () => tmdb.get('/tv/popular'),
-  getMovieOrTvDetails: (id: string, type: 'movie' | 'tv' = 'movie') => tmdb.get(`/${type}/${id}?append_to_response=videos,similar`),
+  getMovieOrTvDetails: (id: string, type: 'movie' | 'tv' = 'movie') => tmdb.get(`/${type}/${id}?append_to_response=videos,similar,credits`),
+  searchMulti: (query: string) => tmdb.get(`/search/multi?query=${encodeURIComponent(query)}`),
   getImageUrl: (path: string, size: string = 'w500') => path ? `https://image.tmdb.org/t/p/${size}${path}` : ''
 });
 
